@@ -16,5 +16,7 @@ const productSchema = new mongoose.Schema({
     status: { type: String, enum: ["DRAFT", "PROCESSING", "PUBLISHED"], default: "PROCESSING" }
 }, { timestamps: true })
 
+productSchema.index({ userId: 1, _id: 1 })
+
 const Product = mongoose.model("Product", productSchema)
 export default Product

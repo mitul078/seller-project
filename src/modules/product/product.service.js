@@ -51,17 +51,6 @@ async function update_product_detail({ userId, productId, name, price, quantity,
 
 }
 
-async function delete_product(productId, userId) {
-    const product = await productRepository.product_by_id(productId, userId)
-    if (!product) {
-        throw new NotFoundError("PRODUCT NOT FOUND OR YOU CAN'T ACCESS IT")
-    }
-
-    await productRepository.remove_product(productId)
-
-    return { message: "SUCCESSFULLY DELETED" }
-}
-
 async function put_images(productId, userId, filePath) {
 
     const product = await productRepository.product_by_id(productId, userId)
@@ -69,6 +58,7 @@ async function put_images(productId, userId, filePath) {
 
     await image_queue.add("resize-product-image", {
         productId: product._id,
+        userId,
         filePath
     })
 
@@ -78,17 +68,24 @@ async function put_images(productId, userId, filePath) {
 
 
 async function publish_product(productId, userId) {
-    const product = await productRepository.product_by_id(productId, userId)
-    if (!product) throw new NotFoundError("PRODUCT NOT FOUND OR YOU CAN'T ACCESS IT")
-
-    if (product.status !== "DRAFT") throw new ConflictError("PRODUCT MUST BE IN DRAFT STATUS TO PUBLISH")
-
-
-    await productRepository.set_status(product._id, "PUBLISHED")
-
+    const updated = await productRepository.publish_if_draft(productId, userId)
+    if (!updated) {
+        const exists = await productRepository.product_by_id(productId, userId)
+        if (!exists) throw new NotFoundError("PRODUCT NOT FOUND OR YOU CAN'T ACCESS IT")
+        throw new ConflictError("PRODUCT MUST BE IN DRAFT STATUS TO PUBLISH")
+    }
     return { message: "PRODUCT HAS BEEN PUBLISHED" }
+}
 
+async function delete_product(productId, userId) {
+    const product = await productRepository.product_by_id(productId, userId)
+    if (!product) {
+        throw new NotFoundError("PRODUCT NOT FOUND OR YOU CAN'T ACCESS IT")
+    }
 
+    await productRepository.remove_product(productId, userId)
+
+    return { message: "SUCCESSFULLY DELETED" }
 }
 
 export default {
