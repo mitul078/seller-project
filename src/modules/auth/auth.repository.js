@@ -34,11 +34,11 @@ async function find_refresh_token(token) {
 }
 
 async function revoke_token(token) {
-    return RefreshToken.findOneAndUpdate({ refreshToken: token }, { isRevoked: true })
+    return RefreshToken.findOneAndUpdate({ refreshToken: token }, { $set: { isRevoked: true } }, { new: true })
 }
 
-async function revoke_family(token) {
-    return RefreshToken.findOneAndUpdate({ family }, { isVerified: true })
+async function revoke_family(family) {
+    return RefreshToken.updateMany({ family }, { $set: { isRevoked: true } })
 }
 
 export default {

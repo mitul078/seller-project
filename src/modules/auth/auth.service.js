@@ -51,7 +51,7 @@ async function verify_otp({ email, otp }) {
 async function signin({ email, password }) {
     const user = await authRepository.find_by_email(email)
     if (!user) throw new UnauthorizedError("INVALID CREDENTIALS")
-    if (!user.isVerified) throw UnauthorizedError("VERIFIED YOUR EMAIL ID FIRST")
+    if (!user.isVerified) throw new UnauthorizedError("VERIFIED YOUR EMAIL ID FIRST")
 
     const is_match = await bcrypt.compare(password, user.password)
     if (!is_match) throw new UnauthorizedError("INVALID CREDENTIALS")
@@ -98,6 +98,7 @@ async function rotate_refresh_token(token) {
 
     await authRepository.revoke_token(hashToken)
     const user = await authRepository.find_by_email(decoded.email)
+    if (!user) throw new NotFoundError("USER NOT FOUND")
 
     const payload = { id: user._id, email: user.email }
     const access_token = set_access_token(payload)
@@ -106,7 +107,7 @@ async function rotate_refresh_token(token) {
     await authRepository.save_refresh_token({
         userId: user._id,
         token: hash_token(refresh_token),
-        family,
+        family: stored_token.family,
         expiresAt: new Date(Date.now() + (7 * 24 * 60 * 60 * 1000))
     })
 
@@ -116,8 +117,8 @@ async function rotate_refresh_token(token) {
 }
 
 async function signout(token) {
-    const hash_token = hash_token(token)
-    await authRepository.revoke_token(hash_token)
+    const hashToken = hash_token(token)
+    await authRepository.revoke_token(hashToken)
     return { message: "SIGNOUT SUCCESSFUL" }
 }
 
