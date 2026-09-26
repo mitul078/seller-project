@@ -1,13 +1,16 @@
-import { Auth, Otp, RefreshToken } from "./auth.model.js";
+import { Auth, Otp, RefreshToken } from "./auth.model.js"
 
 async function find_by_email(email) {
     return Auth.findOne({ email }).select("+password")
 }
 
+async function find_by_id(id) {
+    return Auth.findById(id)
+}
+
 async function create_user({ email, password }) {
     return Auth.create({ email, password })
 }
-
 
 async function set_email_verified(email) {
     return Auth.findOneAndUpdate({ email }, { isVerified: true }, { new: true })
@@ -34,7 +37,7 @@ async function find_refresh_token(token) {
 }
 
 async function revoke_token(token) {
-    return RefreshToken.findOneAndUpdate({ refreshToken: token }, { $set: { isRevoked: true } }, { new: true })
+    return RefreshToken.findOneAndUpdate({ refreshToken: token }, { $set: { isRevoked: true } })
 }
 
 async function revoke_family(family) {
@@ -43,6 +46,7 @@ async function revoke_family(family) {
 
 export default {
     find_by_email,
+    find_by_id,
     create_user,
     set_email_verified,
     save_otp,
@@ -51,5 +55,5 @@ export default {
     save_refresh_token,
     find_refresh_token,
     revoke_family,
-    revoke_token
+    revoke_token,
 }
