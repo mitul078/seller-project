@@ -1,6 +1,6 @@
 import nodemailer from "nodemailer"
 import env from "../../shared/config/index.js"
-import logger from "../logs/logger.js"
+
 
 const transport = nodemailer.createTransport({
     port: env.mail.port,
@@ -14,7 +14,7 @@ const transport = nodemailer.createTransport({
 
 transport.verify((err) => {
     if (err) {
-        logger.error("MAIL SERVER ERROR: ", { err })
+        console.log("MAIL SERVER ERROR: ", { err })
     }
 })
 
