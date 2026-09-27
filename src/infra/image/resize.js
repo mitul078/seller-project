@@ -19,7 +19,7 @@ export async function resize_image(input_path) {
                 .webp({ quality: 80 })
                 .toFile(output_path)
 
-            return [label, output_path]c
+            return [label, output_path]
         })
     )
 
