@@ -8,3 +8,25 @@ export function validate(schema) {
         next()
     }
 }
+
+export function validateParams(schema) {
+    return (req, res, next) => {
+        const parsed = schema.safeParse(req.params)
+        if (!parsed.success) {
+            return res.status(400).json({ message: "Invalid parameters", errors: parsed.error.issues })
+        }
+        req.params = parsed.data
+        next()
+    }
+}
+
+export function validateQuery(schema) {
+    return (req, res, next) => {
+        const parsed = schema.safeParse(req.query)
+        if (!parsed.success) {
+            return res.status(400).json({ message: "Invalid query parameters", errors: parsed.error.issues })
+        }
+        req.query = parsed.data
+        next()
+    }
+}
